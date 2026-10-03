@@ -31,7 +31,7 @@ def salvar_despesa(data, descricao, valor, categoria):
     cursor.execute("""
         INSERT INTO despesas (data, descricao, valor, categoria)
         VALUES (?, ?, ?, ?)
-    """, data, descricao, valor, categoria)
+    """, (data, descricao, valor, categoria))
 
     conexao.commit()
     conexao.close()
