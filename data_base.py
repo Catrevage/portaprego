@@ -2,61 +2,97 @@ import os
 import sqlite3
 import psycopg2
 
-#Verifica se a Render forenceu uma instância Postgresql
-#Se não foi encontrada ele usa o Sqlite
-
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
-def conectar_banco():
-    """ Cria a conexão corrreta de onde o código está rodando"""
 
+def conectar_banco():
+    """Cria a conexão correta dependendo de onde o código está rodando."""
     if DATABASE_URL:
-        #Conecta o Postgre na nuvem
         return psycopg2.connect(DATABASE_URL)
     else:
-        #Cria a conexão com o Sqlite
-        conexao = conectar_banco()
-        cursor = conexao.cursor()
-    #O comando SQL muda de INREGER para SERIAL no Postgre
+        return sqlite3.connect("portaprego.db")
+
+
+# ====== Cria a tabela se ela não existir ======
+def inicializar_banco():
+    """Cria a tabela de despesas se ela ainda não existir."""
+    conexao = conectar_banco()
+    cursor = conexao.cursor()
+
+    # O PostgreSQL usa SERIAL para auto-incremento, o SQLite usa AUTOINCREMENT
     if DATABASE_URL:
-        #criação da tabela no Postgre
         cursor.execute("""
-        CREATE TABLE IF NOT EXISTS despesas (
-                id SERIAL PRIMARY KEY,
-                data TEXT NOT NULL,
-                descricao TEXT NOT NULL,
-                valor REAL NOT NULL,
-                categoria TEXT
-            )
-        """)
+                       CREATE TABLE IF NOT EXISTS despesas
+                       (
+                           id
+                           SERIAL
+                           PRIMARY
+                           KEY,
+                           data
+                           TEXT
+                           NOT
+                           NULL,
+                           descricao
+                           TEXT
+                           NOT
+                           NULL,
+                           valor
+                           REAL
+                           NOT
+                           NULL,
+                           categoria
+                           TEXT
+                       )
+                       """)
     else:
-        #criação da tabela no Sqlite
         cursor.execute("""
-            CREATE TABLE IF NOT EXISTS despesas (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                data TEXT NOT NULL,
-                descricao TEXT NOT NULL,
-                valor REAL NOT NULL,
-                categoria TEXT
-            )
-        """)
+                       CREATE TABLE IF NOT EXISTS despesas
+                       (
+                           id
+                           INTEGER
+                           PRIMARY
+                           KEY
+                           AUTOINCREMENT,
+                           data
+                           TEXT
+                           NOT
+                           NULL,
+                           descricao
+                           TEXT
+                           NOT
+                           NULL,
+                           valor
+                           REAL
+                           NOT
+                           NULL,
+                           categoria
+                           TEXT
+                       )
+                       """)
 
     conexao.commit()
     conexao.close()
     print("🗄️ Banco de dados inicializado com sucesso!")
 
+
+# ========================================================
+
 def salvar_despesa(data, descricao, valor, categoria):
-    """Insere um novo gasto"""
+    """Insere um novo gasto dentro do banco de dados."""
     conexao = conectar_banco()
     cursor = conexao.cursor()
 
-    #O insert funciona da mesma forma nos dois bancos
-    cursor.execute("""
-        INSERT INTO despesas (data, descricao, valor, categoria) 
-        VALUES (?,?,?,?)"""
-                   .replace("?", "%S" if DATABASE_URL else "?"), (data, descricao, valor, categoria))
-    #O postgre usa "%s" no lugar de "?"
+    # No Postgres o placeholder de segurança é %s, no SQLite é ?
+    placeholder = "%s" if DATABASE_URL else "?"
+
+    cursor.execute(f"""
+        INSERT INTO despesas (data, descricao, valor, categoria)
+        VALUES ({placeholder}, {placeholder}, {placeholder}, {placeholder})
+    """, (data, descricao, valor, categoria))
 
     conexao.commit()
     conexao.close()
 
+
+if __name__ == "__main__":
+    inicializar_banco()

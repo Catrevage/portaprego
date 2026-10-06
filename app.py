@@ -1,10 +1,14 @@
 from fastapi import FastAPI, Form
-from data_base_sqlite import salvar_despesa
+from data_base import salvar_despesa, conectar_banco, inicializar_banco
 from parser_mensagem import processar_mensagem
 from datetime import datetime
 
 # Inicializa o servidor FastAPI
 app = FastAPI()
+
+#Inicializado o banco e cria a tabela se ela não existir
+
+inicializar_banco()
 
 #Cria a rota do tipo POST
 
