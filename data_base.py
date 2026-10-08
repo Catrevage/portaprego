@@ -24,49 +24,22 @@ def inicializar_banco():
         cursor.execute("""
                        CREATE TABLE IF NOT EXISTS despesas
                        (
-                           id
-                           SERIAL
-                           PRIMARY
-                           KEY,
-                           data
-                           TEXT
-                           NOT
-                           NULL,
-                           descricao
-                           TEXT
-                           NOT
-                           NULL,
-                           valor
-                           REAL
-                           NOT
-                           NULL,
-                           categoria
-                           TEXT
+                           id SERIAL PRIMARY KEY,
+                           data TEXT NOT NULL,
+                           descricao TEXT NOT NULL,
+                           valor REAL NOT NULL,
+                           categoria TEXT
                        )
                        """)
     else:
         cursor.execute("""
                        CREATE TABLE IF NOT EXISTS despesas
                        (
-                           id
-                           INTEGER
-                           PRIMARY
-                           KEY
-                           AUTOINCREMENT,
-                           data
-                           TEXT
-                           NOT
-                           NULL,
-                           descricao
-                           TEXT
-                           NOT
-                           NULL,
-                           valor
-                           REAL
-                           NOT
-                           NULL,
-                           categoria
-                           TEXT
+                           id INTEGER PRIMARY KEY AUTOINCREMENT,
+                           data TEXT NOT NULL,
+                           descricao TEXT NOT NULL,
+                           valor REAL NOT NULL,
+                           categoria TEXT
                        )
                        """)
 

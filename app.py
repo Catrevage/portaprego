@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Form
+from fastapi import FastAPI, Request, Response, status
 from data_base import salvar_despesa, conectar_banco, inicializar_banco
 from parser_mensagem import processar_mensagem
 from datetime import datetime
@@ -13,14 +13,21 @@ inicializar_banco()
 #Cria a rota do tipo POST
 
 @app.post("/webhook")
-def receber_mensagem_whatsapp(Body: str = Form(...)):
+async def receber_mensagem_whatsapp(request: Request):
     """
     :param Body: texto digitado no whatsapp
     :return: Mensagem no formato XML
     """
-    texto_recebido = Body.strip()
-
     try:
+        #transforma a requisição em um dict
+        dados = await request.json()
+
+        #Navea pelas chaves d JSON e captura o texto digitado
+        mensagem_objeto = dados.get("data", {}).get("message", {})
+        texto_recebido = mensagem_objeto.get("conversation","").strip()
+
+
+
         #Faz o unpacking do texto recebido
         valor, descricao = processar_mensagem(texto_recebido)
 
