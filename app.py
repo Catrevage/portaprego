@@ -27,6 +27,9 @@ async def receber_mensagem_whatsapp(request: Request):
         texto_recebido = mensagem_objeto.get("conversation","").strip()
 
 
+        #se a mensagem iver vazia ou diferente de texto
+        if not texto_recebido:
+            return Response(status_code=status.HTTP_200_OK)
 
         #Faz o unpacking do texto recebido
         valor, descricao = processar_mensagem(texto_recebido)
@@ -40,13 +43,20 @@ async def receber_mensagem_whatsapp(request: Request):
         #Mensagem de sucesso
         resposta = f" 📝*Registrado com sucesso!*\n 💰Valor: {valor}"
 
+        return {
+            "status": "sucesso",
+            "reply": resposta
+        }
+
     except ValueError as erro:
-        #Se o rise lançar ValueError
-        resposta = f" ❌ *Erro de formato:*  {str(erro)}"
 
-    #Retorna a resposta no formato XML exigito pelo Twilio
-    return {
-        "Response": f"<Message><Body>{resposta}</Body></Message>"
-    }
+        #Retorna a resposta no formato XML exigito pelo Twilio
+        return {
+            "status": "erro",
+            "reply": f"❌ *Erro de formato:* {str(erro)}"
+        }
 
-
+    except Exception as erro_generico:
+        #Proteção para outros tipos de erro
+        print(f"Erro inesperado no servidor: {erro_generico}")
+        return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
